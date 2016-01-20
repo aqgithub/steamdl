@@ -1,16 +1,20 @@
 // ==UserScript==
 // @author         Aq
 // @name           DsModDownloader
-// @namespace      aq
+// @namespace      https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.user.js
 // @description    DS/DST mods directly downloader for tieba & steam
 // @include        *steamcommunity.com/sharedfiles/filedetails/?id=*
-// @include		   *tieba.baidu.com/p/*
+// @include        *tieba.baidu.com/p/*
 // @grant          GM_xmlhttpRequest
 // @grant          GM_info
-// @require        http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
+// @require        http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js
+// @updateURL      https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.meta.js
+// @downloadURL    https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.user.js
+// @supportURL     https://github.com/aqgithub/steamdl/issues
 // @version        0.0.1
 // @license        MIT
 // ==/UserScript==
+// 0.0.2 comming soon
 (function (w, d) {
   var API_GET_PUBLISHED_FILE_DETAILS = 'http://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v0001/';
   var curDomain = - 1; // 1 - tieba, 0 - steam
@@ -56,6 +60,7 @@
       });
     } 
     else if (d.domain.toLowerCase().indexOf('steamcommunity.com') > 0) {
+		//not support yet
       curDomain = 0;
     } 
     else {
