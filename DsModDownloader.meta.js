@@ -9,10 +9,10 @@
 // @grant          GM_setClipboard
 // @grant          GM_openInTab
 // @require        http://code.jquery.com/jquery-1.12.0.min.js
-// @updateURL      https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.meta.js
-// @downloadURL    https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.user.js
+// @updateURL      https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.meta.js
+// @downloadURL    https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.user.js
 // @supportURL     https://github.com/aqgithub/steamdl/issues
-// @version        0.0.4
+// @version        0.0.5
 // @license        MIT
 // ==/UserScript==
 
