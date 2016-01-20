@@ -6,14 +6,13 @@
 // @include        *steamcommunity.com/sharedfiles/filedetails/?id=*
 // @include        *tieba.baidu.com/p/*
 // @grant          GM_xmlhttpRequest
-// @grant          GM_info
 // @grant          GM_setClipboard
 // @grant          GM_openInTab
 // @require        http://code.jquery.com/jquery-1.12.0.min.js
 // @updateURL      https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.meta.js
 // @downloadURL    https://github.com/aqgithub/steamdl/blob/master/DsModDownloader.user.js
 // @supportURL     https://github.com/aqgithub/steamdl/issues
-// @version        0.0.2
+// @version        0.0.4
 // @license        MIT
 // ==/UserScript==
 
@@ -314,26 +313,105 @@ if (typeof module !== 'undefined' && module.exports) {
         var fileurl = data.response.publishedfiledetails[0].file_url;
         var filename = data.response.publishedfiledetails[0].title + '.zip';
         if (curDomain) {
-          $dlButton.html('<span class="aq_copy_link">复制下载链接</span> | ').addClass('aq_dl_done').attr({
-            'aq_file_name': filename,
-            'aq_file_link': fileurl
-          });
-          $dlButton.append($('<a>', {
-            href: fileurl,
-            download: filename,
-            'class': 'aq_dl_btn',
-            text: '直接下载'
-          })).append(' | <span class="aq_dl_btn_2">重命名并下载(测试)</span>');
+          if (fileurl) {
+            $dlButton.html('<span class="aq_copy_link">复制下载链接</span> | ').addClass('aq_dl_done').attr({
+              'aq_file_name': filename,
+              'aq_file_link': fileurl
+            });
+            $dlButton.append($('<a>', {
+              href: fileurl,
+              download: filename,
+              'class': 'aq_dl_btn',
+              text: '直接下载'
+            })).append(' | <span class="aq_dl_btn_2">重命名并下载(测试)</span>');
+          } 
+          else {
+            $dlButton.html('无法解析，mod可能已被移除');
+          }
         } 
         else {
+          if (fileurl) {
+            $('#aq-steam-dl-btn').on('click', function () {
+              window.location.href = fileurl;
+            });
+            $('#aq-steam-dl-btn-2:not(.aq_dling)').on('click', function () {
+              renameThenDl2($(this), fileurl, filename);
+            });
+            $('#aq-steam-copy-btn').on('click', function () {
+              GM_setClipboard(fileurl);
+              alert('已复制到剪贴板\n' + fileurl);
+            });
+          } 
+          else {
+            $('.game_area_purchase_game>h1>span').text('mod下载地址解析失败，请重新加载页面');
+            $('#aq-steam-dl-btn').hide();
+            $('#aq-steam-dl-btn-2').hide();
+            $('#aq-steam-copy-btn').hide();
+          }
         }
       },
       onerror: function (reponse) {
-        //alert('error');
-        console.log(reponse);
+        console.log('err: ' + reponse);
       }
     });
-  };
+  }
+  function dataToBlob(data, mimeString) {
+    var buffer = new Int8Array(new ArrayBuffer(data.length));
+    for (var i = 0; i < data.length; i++) {
+      buffer[i] = data.charCodeAt(i) & 255;
+    }
+    try {
+      return new Blob([buffer], {
+        type: mimeString
+      });
+    } catch (e1) {
+      try {
+        var BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+        if (e.name == 'TypeError' && window.BlobBuilder) {
+          bb = new BlobBuilder();
+          bb.append([buffer.buffer]);
+          return bb.getBlob(mimeString);
+        } else if (e.name == 'InvalidStateError') {
+          return new Blob([buffer.buffer], {
+            type: mimeString
+          });
+        }
+      } catch (e2) {
+      }
+    }
+    return null;
+  }
+  function renameThenDl2($btn, fileurl, filename) {
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: fileurl,
+      'overrideMimeType': 'text/plain; charset=x-user-defined',
+      onload: function (d) {
+        saveAs(dataToBlob(d.responseText, 'application/zip'), filename);
+      }
+    })
+  }
+  function renameThenDl($btn, fileurl, filename) {
+    modDling++;
+    $btn.addClass('aq_dling').find('div').text('下载中...0%');
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        $btn.removeClass('aq_dling').find('div').text('重新下载(测试)');
+        modDling--;
+        saveAs(this.response, filename);
+      }
+    };
+    xhr.onprogress = function (progress) {
+      if (progress.lengthComputable) {
+        var percentComplete = Math.ceil(progress.loaded / progress.total * 1000) / 10;
+        $btn.find('div').text('下载中...' + percentComplete + '%');
+      }
+    };
+    xhr.open('GET', fileurl);
+    xhr.responseType = 'blob';
+    xhr.send();
+  }
   function htmlParser() {
     if (d.domain.toLowerCase().indexOf('baidu.com') > 0) {
       curDomain = 1;
@@ -350,36 +428,35 @@ if (typeof module !== 'undefined' && module.exports) {
         alert('已复制到剪贴板\n' + fileLink);
       });
       $(d).on('click', '.aq_dl_btn_2:not(.aq_dling)', function (e) {
-        modDling++;
-        var $dlButton2 = $(this).addClass('aq_dling');
-        var fileurl = $(this).prev().attr('href');
-        var filename = $(this).prev().attr('download');
-        $dlButton2.text('下载中...0%');
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            $dlButton2.text('重新下载(测试)').removeClass('aq_dling');
-            modDling--;
-            saveAs(this.response, filename);
-          }
-        }
-        xhr.onprogress = function (progress) {
-          if (progress.lengthComputable) {
-            var percentComplete = Math.ceil(progress.loaded / progress.total * 10) / 10;
-            $dlButton2.text('下载中...' + percentComplete + '%');
-          }
-        }
-        xhr.open('GET', fileurl);
-        xhr.responseType = 'blob';
-        xhr.send();
+        var $dlButton2 = $(this);
+        var fileurl = $dlButton2.prev().attr('href');
+        var filename = $dlButton2.prev().attr('download');
+        renameThenDl($dlButton2, fileurl, filename);
       });
       $(d).on('click', '.aq_lnk', function (e) {
         GM_openInTab('http://steamcommunity.com/sharedfiles/filedetails/?id=' + $(this).prev().prev().text());
       });
     } 
-    else if (d.domain.toLowerCase().indexOf('steamcommunity.com') > 0) {
-      //not support yet
+    else if (d.domain.toLowerCase().indexOf('steamcommunity.com') > - 1) {
       curDomain = 0;
+      var linkToAnyls = d.URL;
+      var pattern = /steamcommunity.com\D*([0-9]{2,15})/i;
+      var modID = pattern.exec(linkToAnyls);
+      var $btnArea = $('.game_area_purchase_game');
+      $btnArea.find('h1').remove();
+      var $steamDlBtn = $('<a>', {
+        'class': 'btn_green_white_innerfade btn_border_2px btn_medium',
+        id: 'aq-steam-dl-btn',
+        style: 'position: static!important;margin-right: 10px'
+      }).html('<span class="subscribeText" style="padding-left: 15px!important"><div class="subscribeOption subscribe selected">下载</div></span>');
+      var $steamDlBtn2 = $steamDlBtn.clone().attr({
+        id: 'aq-steam-dl-btn-2'
+      }).find('div').text('重命名并下载(小型mod)').end();
+      var $steamCopyBtn = $steamDlBtn.clone().attr({
+        id: 'aq-steam-copy-btn'
+      }).find('div').text('复制下载链接').end();
+      $('#SubscribeItemBtn').children('div').hide().end().after($steamDlBtn).after($steamCopyBtn).after($steamDlBtn2);
+      getDlUrl(modID[1]);
     } 
     else {
     }
