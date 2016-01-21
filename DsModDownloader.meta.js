@@ -394,11 +394,11 @@ if (typeof module !== 'undefined' && module.exports) {
   function htmlParser() {
     if (d.domain.toLowerCase().indexOf('baidu.com') > 0) {
       curDomain = 1;
-      $(d).on('mouseover', '.d_post_content a,.lzl_content_main a', function (e) {
+      $(d).on('mouseover', '.d_post_content a:not(.aq_link_parsed),.lzl_content_main a:not(.aq_link_parsed)', function (e) {
         var linkToAnyls = $(this).text();
         var pattern = /steamcommunity.com\D*([0-9]{2,15})/i;
         var modID = pattern.exec(linkToAnyls);
-        modID && $(this).after('<span class="aq_id aq_ori_link_hide" style="cursor:default;color:blue;margin-left:3px;margin-right:2px"><strong style="color:red"> + </strong>' + modID[1] + '</span>|<span class="aq_dl" style="cursor:pointer;color:red;margin-left:2px;margin-right:2px;">解析中...</span>|<span class="aq_lnk" style="cursor:pointer;color:blue;margin-left:2px;margin-right:3px">转到steam页面</span>').hide();
+        modID && $(this).after('<span class="aq_id aq_ori_link_hide" style="cursor:default;color:blue;margin-left:3px;margin-right:2px"><strong style="color:red"> + </strong>' + modID[1] + '</span>|<span class="aq_dl" style="cursor:pointer;color:red;margin-left:2px;margin-right:2px;">解析中...</span>|<span class="aq_lnk" style="cursor:pointer;color:blue;margin-left:2px;margin-right:3px">转到steam页面</span>').addClass('aq_link_parsed').hide();
         getDlUrl(modID[1], $(this).next().next());
       });
 	  $(d).on('click', '.aq_id', function(e) {
