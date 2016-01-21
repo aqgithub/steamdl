@@ -12,7 +12,7 @@
 // @updateURL      https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.meta.js
 // @downloadURL    https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.user.js
 // @supportURL     https://github.com/aqgithub/steamdl/issues
-// @version        0.0.5
+// @version        0.0.6
 // @license        MIT
 // ==/UserScript==
 
@@ -391,27 +391,6 @@ if (typeof module !== 'undefined' && module.exports) {
       }
     })
   }
-  function renameThenDl($btn, fileurl, filename) {
-    modDling++;
-    $btn.addClass('aq_dling').find('div').text('下载中...0%');
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        $btn.removeClass('aq_dling').find('div').text('重新下载(测试)');
-        modDling--;
-        saveAs(this.response, filename);
-      }
-    };
-    xhr.onprogress = function (progress) {
-      if (progress.lengthComputable) {
-        var percentComplete = Math.ceil(progress.loaded / progress.total * 1000) / 10;
-        $btn.find('div').text('下载中...' + percentComplete + '%');
-      }
-    };
-    xhr.open('GET', fileurl);
-    xhr.responseType = 'blob';
-    xhr.send();
-  }
   function htmlParser() {
     if (d.domain.toLowerCase().indexOf('baidu.com') > 0) {
       curDomain = 1;
@@ -428,10 +407,28 @@ if (typeof module !== 'undefined' && module.exports) {
         alert('已复制到剪贴板\n' + fileLink);
       });
       $(d).on('click', '.aq_dl_btn_2:not(.aq_dling)', function (e) {
-        var $dlButton2 = $(this);
-        var fileurl = $dlButton2.prev().attr('href');
-        var filename = $dlButton2.prev().attr('download');
-        renameThenDl($dlButton2, fileurl, filename);
+        modDling++;
+        var $dlButton2 = $(this).addClass('aq_dling');
+        var fileurl = $(this).prev().attr('href');
+        var filename = $(this).prev().attr('download');
+        $dlButton2.text('下载中...0%');
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            $dlButton2.text('重新下载(测试)').removeClass('aq_dling');
+            modDling--;
+            saveAs(this.response, filename);
+          }
+        };
+        xhr.onprogress = function (progress) {
+          if (progress.lengthComputable) {
+            var percentComplete = Math.ceil(progress.loaded / progress.total * 1000) / 10;
+            $dlButton2.text('下载中...' + percentComplete + '%');
+          }
+        };
+        xhr.open('GET', fileurl);
+        xhr.responseType = 'blob';
+        xhr.send();
       });
       $(d).on('click', '.aq_lnk', function (e) {
         GM_openInTab('http://steamcommunity.com/sharedfiles/filedetails/?id=' + $(this).prev().prev().text());
