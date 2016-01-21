@@ -12,7 +12,7 @@
 // @updateURL      https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.meta.js
 // @downloadURL    https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.user.js
 // @supportURL     https://github.com/aqgithub/steamdl/issues
-// @version        0.1.0
+// @version        0.1.1
 // @license        MIT
 // ==/UserScript==
 
@@ -407,7 +407,7 @@ if (typeof module !== 'undefined' && module.exports) {
 			  $idBtn.removeClass('aq_ori_link_hide').prev().show().end().children().text(' - ');
 		  }
 		  else {
-			  $idBtn.addClass('aq_ori_link_show').prev().hide().end().children().text(' + ');
+			  $idBtn.addClass('aq_ori_link_hide').prev().hide().end().children().text(' + ');
 		  }
 	  });
       $(d).on('click', '.aq_copy_link', function (e) {
