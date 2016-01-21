@@ -12,7 +12,7 @@
 // @updateURL      https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.meta.js
 // @downloadURL    https://github.com/aqgithub/steamdl/raw/master/DsModDownloader.user.js
 // @supportURL     https://github.com/aqgithub/steamdl/issues
-// @version        0.0.6
+// @version        0.1.0
 // @license        MIT
 // ==/UserScript==
 
@@ -398,9 +398,18 @@ if (typeof module !== 'undefined' && module.exports) {
         var linkToAnyls = $(this).text();
         var pattern = /steamcommunity.com\D*([0-9]{2,15})/i;
         var modID = pattern.exec(linkToAnyls);
-        modID && $(this).after('<span class="aq_id" style="cursor:default;color:blue;margin-left:3px;margin-right:2px">' + modID[1] + '</span>|<span class="aq_dl" style="cursor:pointer;color:red;margin-left:2px;margin-right:2px;">解析中...</span>|<span class="aq_lnk" style="cursor:pointer;color:blue;margin-left:2px;margin-right:3px">转到steam页面</span>').hide();
+        modID && $(this).after('<span class="aq_id aq_ori_link_hide" style="cursor:default;color:blue;margin-left:3px;margin-right:2px"><strong style="color:red"> + </strong>' + modID[1] + '</span>|<span class="aq_dl" style="cursor:pointer;color:red;margin-left:2px;margin-right:2px;">解析中...</span>|<span class="aq_lnk" style="cursor:pointer;color:blue;margin-left:2px;margin-right:3px">转到steam页面</span>').hide();
         getDlUrl(modID[1], $(this).next().next());
       });
+	  $(d).on('click', '.aq_id', function(e) {
+		  $idBtn = $(this);
+		  if ($idBtn.hasClass('aq_ori_link_hide')) {
+			  $idBtn.removeClass('aq_ori_link_hide').prev().show().end().children().text(' - ');
+		  }
+		  else {
+			  $idBtn.addClass('aq_ori_link_show').prev().hide().end().children().text(' + ');
+		  }
+	  });
       $(d).on('click', '.aq_copy_link', function (e) {
         var fileLink = $(this).parent().attr('aq_file_link');
         GM_setClipboard(fileLink);
